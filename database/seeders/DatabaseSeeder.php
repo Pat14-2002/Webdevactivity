@@ -7,19 +7,19 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
-
-  class DatabaseSeeder extends Seeder
-{  
-public function run(): void
+class DatabaseSeeder extends Seeder
 {
-        // User::factory(10)->create();
-        User::factory(100)->create();
 
+    public function run(): void
+    {
+       
+        
+         User::factory(100)->create([
         User::create([
-                'name' => 'Test User',
-                'email' => 'test@example.com',
+            'name' => 'Test User',
+            'email' => 'test@example.com',
             'password' => Hash::make('test_password'),
-]);
-  
-}
+        ])
+    ]);
+    }
 }
