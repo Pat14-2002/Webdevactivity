@@ -7,4 +7,6 @@ Route::get('/', function () {
     return view('index');
 });
 
-Route::get('/users', [UserController::class, 'index']);
+Route::get('/users', [UserController::class, 'index'])->name('users.index');
+
+Route::post('/users', [UserController::class, 'createNewUser'])->name('users.store');
