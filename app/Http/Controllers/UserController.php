@@ -4,62 +4,58 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-   
-    public function index()
-    {
-        $users = User::all(); // Retrieve all users
-        return view('index', compact('users'));
-    }
-
-
-    public function store(Request $request)
+    /**
+     * Store a new user in the database
+     */
+    public function store(Request $request) // Changed method name to match route
     {
         $request->validate([
-            'name' => 'required|max:55',
+            'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|min:6'
+            'password' => 'required|min:8'
         ]);
 
-        User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => bcrypt($request->password) // Secure password hashing
-        ]);
-
-        return redirect()->route('users.index')->with('success', 'User created successfully!');
-    }
-
-    
-    public function update(Request $request, $id)
-    {
-        $request->validate([
-            'name' => 'required|max:55',
-            'email' => 'required|email|unique:users,email,' . $id,
-            'password' => 'nullable|min:6'
-        ]);
-
-        $user = User::findOrFail($id);
+        $user = new User();
         $user->name = $request->name;
         $user->email = $request->email;
-
-        if ($request->filled('password')) {
-            $user->password = bcrypt($request->password);
-        }
-
+        $user->password = Hash::make($request->password);
         $user->save();
 
-        return redirect()->route('users.index')->with('success', 'User updated successfully!');
+        return redirect()->route('users.index')->with('success', 'User has been added successfully!');
     }
 
-    // ✅ Delete a user
-    public function destroy($id)
+    /**
+     * Update an existing user
+     */
+    public function update(Request $request, $id) // Ensure `$id` is received properly
+    {
+        $user = User::findOrFail($id); // Find user by ID
+
+        $request->validate([
+            'email' => 'required|email',
+            'password' => 'nullable|min:8'
+        ]);
+        
+        $user->update([
+            'email' => $request->email,
+            'password' => $request->password ? Hash::make($request->password) : $user->password
+        ]);
+
+        return redirect()->route('users.index')->with('success', 'User updated successfully');
+    }
+
+    /**
+     * Delete a user from the database
+     */
+    public function destroy($id) // Changed method name to match Laravel convention
     {
         $user = User::findOrFail($id);
         $user->delete();
 
-        return redirect()->route('users.index')->with('success', 'User deleted successfully!');
+        return back()->with('success', 'User has been deleted successfully!');
     }
 }
